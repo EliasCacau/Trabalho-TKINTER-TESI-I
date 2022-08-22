@@ -2,14 +2,13 @@ from trabalho.contas_id import Id
 
 
 class Conta(Id):
-    conta = 0
     def __init__(self, num, cli, saldo):
         super().__init__()
         self._numero = num
         self._titular = cli
         self._saldo = saldo
         self._status = "Ativo"
-        self._id = Id.id_conta(self)
+        self._id = 0
 
     #Métodos
     @property
@@ -51,11 +50,6 @@ class Conta(Id):
         if self._saldo <= 0:
             self._status = "Encerrada"
         return self._status
-
-    # @classmethod
-    # def id(cls):
-    #     cls.conta += 1
-    #     return cls.conta
 
     def id(self):
         return self._id
