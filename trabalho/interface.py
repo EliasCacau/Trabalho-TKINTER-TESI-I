@@ -264,7 +264,7 @@ class Tela(ContaCorrente, ContaPoupanca, Cliente, Banco):
 
             #Conteudo
             for banco in Banco.bancos:
-                self.tvw_banco_selecionado.insert("", tk.END, values=(banco.nome, banco.num))
+                self.tvw_banco_selecionado.insert("", tk.END, values=(banco.num, banco.nome))
 
             #self.tvw_banco_selecionado.insert("", tk.END, values=("Danone Player", 654789))
             #self.tvw_banco_selecionado.insert("", tk.END, values=("Luiz Eduardo", 654321))
@@ -297,7 +297,7 @@ class Tela(ContaCorrente, ContaPoupanca, Cliente, Banco):
                 print(i.nome)
             self.cbx_mostrar_banco['values'] = Banco.bancos
             self.cbx_mostrar_banco.current(0)
-            self.tvw_banco_selecionado.insert("", tk.END, values=(self.ent_nome_bc.get(), self.ent_num_bc.get()))
+            self.tvw_banco_selecionado.insert("", tk.END, values=(self.ent_num_bc.get(), self.ent_nome_bc.get()))
             self.cadastro_banco.destroy()
             self.banco.deiconify()
 
