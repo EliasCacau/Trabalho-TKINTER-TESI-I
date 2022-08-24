@@ -1,6 +1,8 @@
 class Id:
     contaPoupanca_id = 0
     contaCorrente_id = 0
+    clienteId = 0
+
     def __init__(self):
         pass
 
@@ -11,3 +13,7 @@ class Id:
     def id_contaCorrente(cls):
         Id.contaCorrente_id += 1
         return Id.contaCorrente_id
+
+    def id_cliente(cls):
+        Id.clienteId += 1
+        return Id.clienteId

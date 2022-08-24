@@ -1,17 +1,16 @@
 from trabalho.conta import Conta
-from trabalho.contas_id import Id
+from trabalho.id import Id
 
 
 class ContaCorrente(Conta, Id):
-    def __init__(self, num, cli, saldo):
-        super().__init__(num, cli, saldo)
-        self._taxa = 0.05
+    def __init__(self, num, cli):
+        super().__init__(num, cli)
         self._id = Id.id_contaCorrente(self)
 
 
     def saque(self, valor):
         if self._saldo >= valor:
-            self._saldo = self._saldo * self._taxa
+            self._saldo = self._saldo - 1
             self._saldo = self._saldo - valor
         else:
             print("Saldo insuficiente")

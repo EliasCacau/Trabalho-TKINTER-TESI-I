@@ -1,14 +1,14 @@
-from trabalho.cliente_id import ClienteId
+from trabalho.id import Id
 
 
-class Cliente(ClienteId):
+class Cliente(Id):
     clientes = []
-    def __init__(self, n, e, cpf):
+    def __init__(self, n, cpf, e):
         super().__init__()
         self._nome = n
         self._endereco = e
         self._cpf = cpf
-        self._id = ClienteId.id_cliente(self)
+        self._id = Id.id_cliente(self)
 
     #Métodos
     def __str__(self):
@@ -32,7 +32,7 @@ class Cliente(ClienteId):
 
     @property
     def cpf(self):
-        return self._endereco
+        return self._cpf
 
     @cpf.setter
     def cpf(self, valor):

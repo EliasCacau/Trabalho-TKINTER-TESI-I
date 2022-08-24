@@ -20,6 +20,8 @@ conta5 = Conta(1234, "ELias", 100)
 cc6 = ContaCorrente(123, "ESA", 50)
 conta6 = Conta(1234, "E", 100)
 
+print(cc1.status())
+
 # print(banco1.adicionar_conta(conta1))
 # banco1.adicionar_conta(conta6)
 # print(banco1.adicionar_conta(cc6))
