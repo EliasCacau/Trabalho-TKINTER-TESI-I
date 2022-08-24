@@ -11,6 +11,10 @@ import sys
 
 class Tela(ContaCorrente, ContaPoupanca, Cliente, Banco):
     def __init__(self, master):
+        cliente = Cliente("Elias de Olivera Cacau", "024.631.012-02", "Rua Letícia Rodrigues")
+        Cliente.adicionar_clientes(self, cliente)
+        banco = Banco(123, "Santander")
+        Banco.adicionar_banco(self, banco)
         def cliente(event):
             self.cliente = tk.Toplevel()
             self.cliente.title("Cliente")
@@ -37,9 +41,8 @@ class Tela(ContaCorrente, ContaPoupanca, Cliente, Banco):
             self.tvw_cliente.column(colunas[3], minwidth=0, width=160)
 
             #Conteúdo
-            cliente = Cliente("Elias de Olivera Cacau", "024.631.012-02", "Rua Letícia Rodrigues")
-            Cliente.adicionar_clientes(self, cliente)
-            self.tvw_cliente.insert("", tk.END, values=(cliente.id, cliente.nome, cliente.cpf, cliente.endereco))
+            for cliente in Cliente.clientes:
+                self.tvw_cliente.insert("", tk.END, values=(cliente.id, cliente.nome, cliente.cpf, cliente.endereco))
 
             #Scrollbar
             self.scr_cliente = ttk.Scrollbar(self.cliente, command=self.tvw_cliente.yview)
@@ -238,7 +241,7 @@ class Tela(ContaCorrente, ContaPoupanca, Cliente, Banco):
             self.cbx_mostrar_banco = ttk.Combobox(self.banco, textvariable=self.selecionado)
             self.cbx_mostrar_banco['values'] = Banco.bancos
             self.cbx_mostrar_banco['state'] = 'readonly'
-            #self.cbx_mostrar_banco.current(0)
+            self.cbx_mostrar_banco.current(0)
             self.cbx_mostrar_banco.grid(column=3, row=0)
 
             #self.btn_selecionar = tk.Button(self.banco, text="Selecionar", command=banco_selecionado)
@@ -259,7 +262,10 @@ class Tela(ContaCorrente, ContaPoupanca, Cliente, Banco):
             self.tvw_banco_selecionado.column(colunas[1], minwidth=0, width=170)
             # self.tvw_banco_selecionado.column(colunas[2], minwidth=0, width=111)
 
-            #self.tvw_banco_selecionado.insert("", tk.END, values=("Elias Cacau", 123456))
+            #Conteudo
+            for banco in Banco.bancos:
+                self.tvw_banco_selecionado.insert("", tk.END, values=(banco.nome, banco.num))
+
             #self.tvw_banco_selecionado.insert("", tk.END, values=("Danone Player", 654789))
             #self.tvw_banco_selecionado.insert("", tk.END, values=("Luiz Eduardo", 654321))
 
@@ -267,7 +273,7 @@ class Tela(ContaCorrente, ContaPoupanca, Cliente, Banco):
         def cadastrar_banco():
             self.cadastro_banco = tk.Toplevel()
             self.cadastro_banco.title("Cadastrar Banco")
-            self.cadastro_banco.geometry("400x200")
+            self.cadastro_banco.geometry("250x100")
             self.banco.iconify()
 
             self.btn_num_bc = tk.Label(self.cadastro_banco, text="Número")
