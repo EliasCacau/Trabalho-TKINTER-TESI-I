@@ -7,12 +7,14 @@ from trabalho.contaCorrente import ContaCorrente
 from trabalho.contaPoupanca import ContaPoupanca
 import sys
 
+# COLOCAR MENU EM CIMA
+
 class Tela(ContaCorrente, ContaPoupanca, Cliente, Banco):
     def __init__(self, master):
         def cliente(event):
             self.cliente = tk.Toplevel()
             self.cliente.title("Cliente")
-            self.cliente.geometry("455x300")
+            self.cliente.geometry("473x300")
 
             self.frm_cli_botoes = tk.Frame(self.cliente)
             self.frm_cli_botoes.pack(side=tk.BOTTOM)
@@ -31,11 +33,11 @@ class Tela(ContaCorrente, ContaPoupanca, Cliente, Banco):
             # Tamanho
             self.tvw_cliente.column(colunas[0], minwidth=0, width=25)
             self.tvw_cliente.column(colunas[1], minwidth=0, width=160)
-            self.tvw_cliente.column(colunas[2], minwidth=0, width=100)
-            self.tvw_cliente.column(colunas[3], minwidth=0, width=150)
+            self.tvw_cliente.column(colunas[2], minwidth=0, width=111)
+            self.tvw_cliente.column(colunas[3], minwidth=0, width=160)
 
             #Conteúdo
-            cliente = Cliente("Elias Cacau", "024.631.012-02", "Rua Ametista")
+            cliente = Cliente("Elias de Olivera Cacau", "024.631.012-02", "Rua Letícia Rodrigues")
             Cliente.adicionar_clientes(self, cliente)
             self.tvw_cliente.insert("", tk.END, values=(cliente.id, cliente.nome, cliente.cpf, cliente.endereco))
 
@@ -57,7 +59,7 @@ class Tela(ContaCorrente, ContaPoupanca, Cliente, Banco):
         def cadastrar_cliente():
             self.cadastrar_cliente = tk.Toplevel()
             self.cadastrar_cliente.title("Cadastrar Banco")
-            self.cadastrar_cliente.geometry("200x100")
+            self.cadastrar_cliente.geometry("250x100")
 
             self.btn_nome_cli = tk.Label(self.cadastrar_cliente, text="Nome")
             self.btn_nome_cli.grid(column=0, row=0)
@@ -115,21 +117,27 @@ class Tela(ContaCorrente, ContaPoupanca, Cliente, Banco):
             self.frm_cc = tk.Frame(self.conta_corrente)
             self.frm_cc.pack(side=tk.BOTTOM)
 
-            colunas = ["id", "número", "cliente", "saldo"]
-            self.tvw_banco_selecionado = ttk.Treeview(self.banco, columns=colunas, show="headings")
-            self.tvw_banco_selecionado.grid(column=0, row=2)
+            colunas = ["id", "cliente", "número", "saldo"]
+            self.tvw_conta_corrente = ttk.Treeview(self.conta_corrente, columns=colunas, show="headings")
+            self.tvw_conta_corrente.pack(side=tk.LEFT, fill=tk.BOTH)
 
             # Cabeçalho
-            self.tvw_banco_selecionado.heading(colunas[0], text='Número')
-            self.tvw_banco_selecionado.heading(colunas[1], text='Nome')
-            self.tvw_banco_selecionado.heading(colunas[2], text='Nome')
-            self.tvw_banco_selecionado.heading(colunas[3], text='Nome')
-            # self.tvw_banco_selecionado.heading(colunas[2], text='Contas')
+            self.tvw_conta_corrente.heading(colunas[0], text='Id')
+            self.tvw_conta_corrente.heading(colunas[1], text='Cliente')
+            self.tvw_conta_corrente.heading(colunas[2], text='Número')
+            self.tvw_conta_corrente.heading(colunas[3], text='Saldo')
+            # self.tvw_conta_corrente.heading(colunas[2], text='Banco')
 
             # Tamanho
-            self.tvw_banco_selecionado.column(colunas[0], minwidth=0, width=111)
-            self.tvw_banco_selecionado.column(colunas[1], minwidth=0, width=170)
-            # self.tvw_banco_selecionado.column(colunas[2], minwidth=0, width=111)
+            self.tvw_conta_corrente.column(colunas[0], minwidth=0, width=25)
+            self.tvw_conta_corrente.column(colunas[1], minwidth=0, width=160)
+            self.tvw_conta_corrente.column(colunas[2], minwidth=0, width=105)
+            self.tvw_conta_corrente.column(colunas[3], minwidth=0, width=105)
+
+            # Scrollbar
+            self.scr_conta_corrente = ttk.Scrollbar(self.conta_corrente, command=self.tvw_conta_corrente.yview)
+            self.scr_conta_corrente.pack(side=tk.LEFT, fill=tk.BOTH)
+            self.tvw_conta_corrente.configure(yscroll=self.scr_conta_corrente.set)
 
             self.btn_cc_cadastrar = tk.Button(self.frm_cc, font=("Verdana", 12), text="Cadastrar", bg="#9cd7ff",
                                                 command=cadastrar_cc)
