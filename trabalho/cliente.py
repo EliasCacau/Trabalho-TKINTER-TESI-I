@@ -9,6 +9,7 @@ class Cliente(Id):
         self._endereco = e
         self._cpf = cpf
         self._id = Id.id_cliente(self)
+        self._banco = ''
 
     #Métodos
     def __str__(self):
@@ -41,6 +42,14 @@ class Cliente(Id):
     @property
     def id(self):
         return self._id
+
+    @property
+    def banco(self):
+        return self._banco
+
+    @banco.setter
+    def banco(self, valor):
+        self._banco = valor
 
     def adicionar_clientes(cls, cliente):
         Cliente.clientes.append(cliente)

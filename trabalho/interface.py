@@ -11,20 +11,22 @@ import sys
 
 class Tela(ContaCorrente, ContaPoupanca, Cliente, Banco):
     def __init__(self, master):
-        cliente = Cliente("Elias de Olivera Cacau", "024.631.012-02", "Rua Letícia Rodrigues")
-        Cliente.adicionar_clientes(self, cliente)
         banco = Banco(123, "Santander")
         Banco.adicionar_banco(self, banco)
+        cliente = Cliente("Elias de Olivera Cacau", "024.631.012-02", "Rua Letícia Rodrigues")
+        cliente.banco = banco
+        Cliente.adicionar_clientes(self, cliente)
+
         def cliente(event):
             self.cliente = tk.Toplevel()
             self.cliente.title("Cliente")
-            self.cliente.geometry("473x300")
+            self.cliente.geometry("575x300")
 
             self.frm_cli_botoes = tk.Frame(self.cliente)
             self.frm_cli_botoes.pack(side=tk.BOTTOM)
 
             # Treeview
-            colunas = ['id', 'nome', 'cpf', 'endereco']
+            colunas = ['id', 'nome', 'cpf', 'endereco', 'banco']
             self.tvw_cliente = ttk.Treeview(self.cliente, columns=colunas, show="headings")
             self.tvw_cliente.pack(side=tk.LEFT, fill=tk.BOTH)
 
@@ -33,16 +35,19 @@ class Tela(ContaCorrente, ContaPoupanca, Cliente, Banco):
             self.tvw_cliente.heading(colunas[1], text='Nome')
             self.tvw_cliente.heading(colunas[2], text='CPF')
             self.tvw_cliente.heading(colunas[3], text='Endereço')
+            self.tvw_cliente.heading(colunas[4], text='Banco')
+
 
             # Tamanho
             self.tvw_cliente.column(colunas[0], minwidth=0, width=25)
             self.tvw_cliente.column(colunas[1], minwidth=0, width=160)
             self.tvw_cliente.column(colunas[2], minwidth=0, width=111)
             self.tvw_cliente.column(colunas[3], minwidth=0, width=160)
+            self.tvw_cliente.column(colunas[4], minwidth=0, width=100)
 
             #Conteúdo
             for cliente in Cliente.clientes:
-                self.tvw_cliente.insert("", tk.END, values=(cliente.id, cliente.nome, cliente.cpf, cliente.endereco))
+                self.tvw_cliente.insert("", tk.END, values=(cliente.id, cliente.nome, cliente.cpf, cliente.endereco, cliente.banco))
 
             #Scrollbar
             self.scr_cliente = ttk.Scrollbar(self.cliente, command=self.tvw_cliente.yview)
@@ -53,54 +58,90 @@ class Tela(ContaCorrente, ContaPoupanca, Cliente, Banco):
             self.btn_cli_cadastrar = tk.Button(self.frm_cli_botoes, text="Cadastrar", command=cadastrar_cliente, bg="#9cd7ff")
             self.btn_cli_cadastrar.pack(side=tk.LEFT)
 
-            # self.btn_cli_editar = tk.Button(self.frm_cli_botoes, text="Editar", command=editar_cliente)
-            # self.btn_cli_editar.pack(side=tk.LEFT, padx=5)
-
             self.btn_cli_excluir = tk.Button(self.frm_cli_botoes, text="Excluir", command=excluir_cliente, bg="#9cd7ff")
             self.btn_cli_excluir.pack(side=tk.LEFT)
 
+            self.btn_cli_desvincular = tk.Button(self.frm_cli_botoes, text="Desvincular", command=desvincular_banco, bg="#9cd7ff")
+            self.btn_cli_desvincular.pack(side=tk.LEFT)
+
         def cadastrar_cliente():
             self.cadastrar_cliente = tk.Toplevel()
-            self.cadastrar_cliente.title("Cadastrar Banco")
-            self.cadastrar_cliente.geometry("250x100")
+            self.cadastrar_cliente.title("Cadastrar Cliente")
+            self.cadastrar_cliente.geometry("270x150")
 
-            self.btn_nome_cli = tk.Label(self.cadastrar_cliente, text="Nome")
+            self.btn_nome_cli = tk.Label(self.cadastrar_cliente, text="Nome:")
             self.btn_nome_cli.grid(column=0, row=0)
             self.ent_nome_cli = tk.Entry(self.cadastrar_cliente)
             self.ent_nome_cli.grid(column=1, row=0)
 
-            self.btn_cpf_cli = tk.Label(self.cadastrar_cliente, text="CPF")
+            self.btn_cpf_cli = tk.Label(self.cadastrar_cliente, text="CPF:")
             self.btn_cpf_cli.grid(column=0, row=1)
             self.ent_cpf_cli = tk.Entry(self.cadastrar_cliente)
             self.ent_cpf_cli.grid(column=1, row=1)
 
-            self.btn_end_cli = tk.Label(self.cadastrar_cliente, text="Endereço")
+            self.btn_end_cli = tk.Label(self.cadastrar_cliente, text="Endereço:")
             self.btn_end_cli.grid(column=0, row=2)
             self.ent_end_cli = tk.Entry(self.cadastrar_cliente)
             self.ent_end_cli.grid(column=1, row=2)
 
+            self.lbl_cadastro_banco = tk.Label(self.cadastrar_cliente, text="Selecione o banco:")
+            self.lbl_cadastro_banco.grid(column=0, row=3)
+            self.selecionado = tk.StringVar()
+            self.cbx_cc_banco = ttk.Combobox(self.cadastrar_cliente, textvariable=self.selecionado)
+            self.cbx_cc_banco['values'] = Banco.bancos
+            self.cbx_cc_banco['state'] = 'readonly'
+            self.cbx_cc_banco.current(0)
+            self.cbx_cc_banco.grid(column=1, row=3, pady=5)
+
             self.btn_salvar_cli = tk.Button(self.cadastrar_cliente, text="Salvar", command=confirmar_cadastrar_cliente)
-            self.btn_salvar_cli.grid(column=1, row=3, columnspan=2)
+            self.btn_salvar_cli.grid(column=1, row=4, columnspan=2)
 
         def confirmar_cadastrar_cliente():
             cliente = Cliente(self.ent_nome_cli.get(), self.ent_cpf_cli.get(), self.ent_end_cli.get())
+            selecionado = self.selecionado.get()
+            for banco in Banco.bancos:
+                if selecionado == banco.nome:
+                    selecionado = banco
+                    cliente.banco = banco
             Cliente.adicionar_clientes(self, cliente)
-            self.tvw_cliente.insert("", tk.END, values=(cliente.id, cliente.nome, cliente.cpf, cliente.endereco))
+            self.tvw_cliente.insert("", tk.END, values=(cliente.id, cliente.nome, cliente.cpf, cliente.endereco, cliente.banco))
             self.cadastrar_cliente.destroy()
+            self.cliente.deiconify()
 
         def excluir_cliente():
             selecionado = self.tvw_cliente.selection()
             lista = self.tvw_cliente.item(selecionado, "values")
-            if lista != ():
-                messagem = messagebox.askyesno("Cuidado!", "Tem certeza que deseja apagar o item selecionado?")
-                if messagem:
-                    for l in lista:
-                        for cli in Cliente.clientes:
-                            if l == cli.nome:
-                                Cliente.clientes.remove(cli)
-                    for s in selecionado:
-                        self.tvw_cliente.delete(s)
-                self.cliente.deiconify()
+            if selecionado != ():
+                if lista[4] == '':
+                    # Solução para a janela principal não sobreescrever a tela cliente
+                    self.janela.iconify()
+                    messagem = messagebox.askyesno("Cuidado!", "Tem certeza que deseja apagar o item selecionado?")
+                    if messagem == False:
+                        self.janela.deiconify()
+                        self.cliente.deiconify()
+                    else:
+                        for l in lista:
+                            for cli in Cliente.clientes:
+                                if l == cli.nome:
+                                    Cliente.clientes.remove(cli)
+                        for s in selecionado:
+                            self.tvw_cliente.delete(s)
+                        self.janela.deiconify()
+                        self.cliente.deiconify()
+                else:
+                    messagebox.showinfo("Não é possivel remover", "Só é permitido a remoção de cliente não vinculado a um banco")
+
+        def desvincular_banco():
+            selecionado = self.tvw_cliente.selection()
+            lista = self.tvw_cliente.item(selecionado, "values")
+            cliente = 0
+            if selecionado != ():
+                for l in lista:
+                    for cli in Cliente.clientes:
+                        if l == cli.nome:
+                            cli.banco = ''
+                            cliente = cli
+                self.tvw_cliente.item(selecionado, values=(cliente.id, cliente.nome, cliente.cpf, cliente.endereco, cliente.banco))
 
         def conta():
             self.conta = tk.Toplevel()
@@ -109,18 +150,20 @@ class Tela(ContaCorrente, ContaPoupanca, Cliente, Banco):
             self.btn_conta_corrente = tk.Button(self.conta, font=("Verdana", 12), text="Conta Corrente", bg="#9cd7ff",
                                                 command=conta_corrente)
             self.btn_conta_corrente.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
-            self.btn_conta_poupanca = tk.Button(self.conta, font=("Verdana", 12), text="Conta Popuança", bg="#6695fa")
+            self.btn_conta_poupanca = tk.Button(self.conta, font=("Verdana", 12), text="Conta Popuança", bg="#6695fa", command=conta_poupanca)
             self.btn_conta_poupanca.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
 
         def conta_corrente():
             self.conta_corrente = tk.Toplevel()
             self.conta_corrente.title("Conta Corrente")
-            self.conta_corrente.geometry("412x300")
+            self.conta_corrente.geometry("625x300")
+            self.conta.destroy()
+            #self.conta_corrente.geometry("412x300")
 
             self.frm_cc = tk.Frame(self.conta_corrente)
             self.frm_cc.pack(side=tk.BOTTOM)
 
-            colunas = ["id", "cliente", "número", "saldo"]
+            colunas = ["id", "cliente", "número", "saldo", "status", "banco"]
             self.tvw_conta_corrente = ttk.Treeview(self.conta_corrente, columns=colunas, show="headings")
             self.tvw_conta_corrente.pack(side=tk.LEFT, fill=tk.BOTH)
 
@@ -129,128 +172,341 @@ class Tela(ContaCorrente, ContaPoupanca, Cliente, Banco):
             self.tvw_conta_corrente.heading(colunas[1], text='Cliente')
             self.tvw_conta_corrente.heading(colunas[2], text='Número')
             self.tvw_conta_corrente.heading(colunas[3], text='Saldo')
-            # self.tvw_conta_corrente.heading(colunas[2], text='Banco')
+            self.tvw_conta_corrente.heading(colunas[4], text='Status')
+            self.tvw_conta_corrente.heading(colunas[5], text='Banco')
 
             # Tamanho
             self.tvw_conta_corrente.column(colunas[0], minwidth=0, width=25)
             self.tvw_conta_corrente.column(colunas[1], minwidth=0, width=160)
             self.tvw_conta_corrente.column(colunas[2], minwidth=0, width=105)
             self.tvw_conta_corrente.column(colunas[3], minwidth=0, width=105)
+            self.tvw_conta_corrente.column(colunas[4], minwidth=0, width=105)
+            self.tvw_conta_corrente.column(colunas[5], minwidth=0, width=105)
 
             # Scrollbar
             self.scr_conta_corrente = ttk.Scrollbar(self.conta_corrente, command=self.tvw_conta_corrente.yview)
             self.scr_conta_corrente.pack(side=tk.LEFT, fill=tk.BOTH)
             self.tvw_conta_corrente.configure(yscroll=self.scr_conta_corrente.set)
 
-            self.btn_cc_cadastrar = tk.Button(self.frm_cc, font=("Verdana", 12), text="Cadastrar", bg="#9cd7ff",
+            self.btn_cc_cadastrar = tk.Button(self.frm_cc, font=("Verdana", 12), text="Cadastrar", bg="white",
                                                 command=cadastrar_cc)
-            self.btn_cc_cadastrar.pack(side=tk.RIGHT, fill=tk.BOTH)
-            self.btn_cc_depositar = tk.Button(self.frm_cc, font=("Verdana", 12), text="Depositar", bg="#9cd7ff",
+            self.btn_cc_cadastrar.pack(side=tk.LEFT, fill=tk.BOTH)
+            self.btn_cc_depositar = tk.Button(self.frm_cc, font=("Verdana", 12), text="Depositar", bg="green",
+                                              command=depositar_cc)
+            self.btn_cc_depositar.pack(side=tk.LEFT, fill=tk.BOTH)
+            self.btn_cc_sacar = tk.Button(self.frm_cc, font=("Verdana", 12), text="Sacar", bg="green",
+                                              command=sacar_cc)
+            self.btn_cc_sacar.pack(side=tk.LEFT, fill=tk.BOTH)
+            self.btn_cc_extrato = tk.Button(self.frm_cc, font=("Verdana", 12), text="Extrato", bg="yellow",
                                               command=cadastrar_cc)
-            self.btn_cc_depositar.pack(side=tk.RIGHT, fill=tk.BOTH)
-            self.btn_cc_sacar = tk.Button(self.frm_cc, font=("Verdana", 12), text="Sacar", bg="#9cd7ff",
-                                              command=cadastrar_cc)
-            self.btn_cc_sacar.pack(side=tk.RIGHT, fill=tk.BOTH)
-            self.btn_cc_extrato = tk.Button(self.frm_cc, font=("Verdana", 12), text="Extrato", bg="#9cd7ff",
-                                              command=cadastrar_cc)
-            self.btn_cc_extrato.pack(side=tk.RIGHT, fill=tk.BOTH)
+            self.btn_cc_extrato.pack(side=tk.LEFT, fill=tk.BOTH)
 
-
-
-            #
-            # self.btn_selecionar = tk.Button(self.conta_corrente, text="Selecionar")
-            # self.btn_selecionar.pack()
-            #
-            # colunas = ['numero', 'titular', 'saldo']
-            # self.tvw_conta_corrente = ttk.Treeview(self.conta_corrente, columns=colunas, show="headings")
-            # self.tvw_conta_corrente.pack(side=tk.LEFT, fill=tk.BOTH)
-            #
-            # # Cabeçalho
-            # self.tvw_conta_corrente.heading(colunas[0], text='Número')
-            # self.tvw_conta_corrente.heading(colunas[1], text='Titular')
-            # self.tvw_conta_corrente.heading(colunas[2], text='Saldo')
-            #
-            # # Tamanho
-            # self.tvw_conta_corrente.column(colunas[0], minwidth=0, width=111)
-            # self.tvw_conta_corrente.column(colunas[1], minwidth=0, width=170)
-            # self.tvw_conta_corrente.column(colunas[2], minwidth=0, width=111)
-            #
-            # # Conteúdo
-            # self.tvw_conta_corrente.insert("", tk.END, values=(123, "Elias Cacau", 1500))
-            #
-            # # Scrollbar
-            # self.scr_cliente = ttk.Scrollbar(self.conta_corrente, command=self.tvw_conta_corrente.yview)
-            # self.scr_cliente.pack(side=tk.LEFT, fill=tk.BOTH)
-            # self.tvw_conta_corrente.configure(yscroll=self.scr_cliente.set)
-            #
-            # # Botões
-            # self.btn_cc_cadastrar = tk.Button(self.frm_cc, text="Depositar")
-            # # self.btn_cc_cadastrar = tk.Button(self.frm_cc_botoes, text="Cadastrar", command=self.cadastrar_conta_corrente)
-            # self.btn_cc_cadastrar.pack(side=tk.LEFT)
-            #
-            # # self.btn_cli_editar = tk.Button(self.frm_cli_botoes, text="Editar", command=self.editar_cliente)
-            # # self.btn_cli_editar.pack(side=tk.LEFT, padx=5)
-            #
-            # self.btn_cc_encerrar = tk.Button(self.frm_cc, text="Sacar")
-            # # self.btn_cc_encerrar = tk.Button(self.frm_cc_botoes, text="Excluir", command=self.encerrar_conta_corrente)
-            # self.btn_cc_encerrar.pack(side=tk.LEFT)
+            #self.btn_cc_encerrar = tk.Button(self.frm_cc, text="Sacar")
+            self.btn_cc_encerrar = tk.Button(self.frm_cc, text="Encerrar", font=("Verdana", 12), bg="orange", command=encerrar_conta_corrente)
+            self.btn_cc_encerrar.pack(side=tk.LEFT)
 
         def cadastrar_cc():
             self.cadastrar_cc = tk.Toplevel()
-            self.cadastrar_cc.geometry("800x600")
+            self.cadastrar_cc.geometry("280x130")
             self.lbl_cadastro_nome = tk.Label(self.cadastrar_cc, text="Selecione o cliente:")
             # self.lbl_cadastro_nome = tk.Label(self.cadastrar_cc, text="Selecione o cliente", font="Verdana, 12", bg="#6695fa")
-            self.lbl_cadastro_nome.grid(column=0, row=0)
+            self.lbl_cadastro_nome.grid(column=0, row=0, pady=5)
             self.selecionado_cliente = tk.StringVar()
-            self.cbx_cc_cliente = ttk.Combobox(self.cadastrar_cc, textvariable=self.selecionado)
+            self.cbx_cc_cliente = ttk.Combobox(self.cadastrar_cc, textvariable=self.selecionado_cliente)
             self.cbx_cc_cliente['values'] = Cliente.clientes
             self.cbx_cc_cliente['state'] = 'readonly'
             self.cbx_cc_cliente.current(0)
             self.cbx_cc_cliente.grid(column=1, row=0)
 
             self.lbl_cadastro_num = tk.Label(self.cadastrar_cc, text="Número:")
-            self.lbl_cadastro_num.grid(column=2, row=0)
+            self.lbl_cadastro_num.grid(column=0, row=2)
             self.ent_cadastro_num = tk.Entry(self.cadastrar_cc)
-            self.ent_cadastro_num.grid(column=3, row=0)
+            self.ent_cadastro_num.grid(column=1, row=2, pady=5)
 
-            self.selecionado = tk.StringVar()
-            self.cbx_cc_banco = ttk.Combobox(self.cadastrar_cc, textvariable=self.selecionado)
-            self.cbx_cc_banco['values'] = Banco.bancos
-            self.cbx_cc_banco['state'] = 'readonly'
-            self.cbx_cc_banco.current(0)
-            self.cbx_cc_banco.grid(column=4, row=0)
+            self.btn_confirmar_cc = tk.Button(self.cadastrar_cc, text="Confirmar", command=confirmar_cadastro_cc)
+            self.btn_confirmar_cc.grid(column=1, row=3, columnspan=1)
+
+        def confirmar_cadastro_cc():
+            nome = ContaCorrente(self.ent_cadastro_num.get(), self.selecionado_cliente.get())
+            selecionado = self.selecionado_cliente.get()
+            for cliente in Cliente.clientes:
+                if selecionado == cliente.nome:
+                    selecionado = cliente
+                    nome.banco = cliente.banco
+            ContaCorrente.add_conta(self, nome)
+            self.tvw_conta_corrente.insert("", tk.END, values=(nome.id, nome.titular, nome.numero, nome.saldo, nome.status, nome.banco))
+            self.cadastrar_cc.destroy()
+            self.conta_corrente.deiconify()
+
+        def depositar_cc():
+            selecionado = self.tvw_conta_corrente.selection()
+            lista = self.tvw_conta_corrente.item(selecionado, "values")
+            if selecionado != ():
+                for conta in ContaCorrente.contas:
+                    if int(lista[0]) == conta.id:
+                        if conta.status == "Ativo":
+                            self.depositar_cc = tk.Toplevel()
+                            self.depositar_cc.title("Depositar")
+                            self.depositar_cc.geometry("150x100")
+                            self.lbl_depositar = tk.Label(self.depositar_cc, text="Valor")
+                            self.lbl_depositar.pack()
+                            self.ent_depositar = tk.Entry(self.depositar_cc)
+                            self.ent_depositar.pack()
+                            self.btn_confirmar_deposito = tk.Button(self.depositar_cc, text="Confirmar", command=confirmar_deposito_cc)
+                            self.btn_confirmar_deposito.pack(pady=5)
+                        else:
+                            messagebox.showinfo("Conta encerrada", "Esta conta foi encerrada")
+                            self.conta_corrente.deiconify()
+
+        def confirmar_deposito_cc():
+            selecionado = self.tvw_conta_corrente.selection()
+            lista = self.tvw_conta_corrente.item(selecionado, "values")
+            for conta in ContaCorrente.contas:
+                if int(lista[0]) == conta.id:
+                    conta.deposito(float(self.ent_depositar.get()))
+                    self.tvw_conta_corrente.item(selecionado, values=(conta.id, conta.titular, conta.numero, conta.saldo, conta.status, conta.banco))
+            self.depositar_cc.destroy()
+
+        def sacar_cc():
+            selecionado = self.tvw_conta_corrente.selection()
+            lista = self.tvw_conta_corrente.item(selecionado, "values")
+            if selecionado != ():
+                for conta in ContaCorrente.contas:
+                    if int(lista[0]) == conta.id:
+                        if conta.status == "Ativo":
+                            if selecionado != ():
+                                self.sacar_cc = tk.Toplevel()
+                                self.sacar_cc.title("Sacar")
+                                self.sacar_cc.geometry("150x100")
+                                self.lbl_sacar = tk.Label(self.sacar_cc, text="Valor")
+                                self.lbl_sacar.pack()
+                                self.ent_sacar = tk.Entry(self.sacar_cc)
+                                self.ent_sacar.pack()
+                                self.btn_confirmar_saque = tk.Button(self.sacar_cc, text="Confirmar", command=confirmar_saque_cc)
+                                self.btn_confirmar_saque.pack(pady=5)
+                        else:
+                            messagebox.showinfo("Conta encerrada", "Esta conta foi encerrada")
+                            self.conta_corrente.deiconify()
+
+        def confirmar_saque_cc():
+            selecionado = self.tvw_conta_corrente.selection()
+            lista = self.tvw_conta_corrente.item(selecionado, "values")
+            for conta in ContaCorrente.contas:
+                if int(lista[0]) == conta.id:
+                    if conta.saldo-1 >= float(self.ent_sacar.get()):
+                        conta.saque(float(self.ent_sacar.get()))
+                        self.tvw_conta_corrente.item(selecionado, values=(conta.id, conta.titular, conta.numero, conta.saldo, conta.status, conta.banco))
+                    else:
+                        messagebox.showinfo('Saldo insuficiente!', "Saldo insuficiente!")
+                        self.conta_corrente.deiconify()
+            self.sacar_cc.destroy()
+
+        def encerrar_conta_corrente():
+            selecionado = self.tvw_conta_corrente.selection()
+            lista = self.tvw_conta_corrente.item(selecionado, "values")
+            if float(lista[3]) == 0 and lista[4] == 'Ativo':
+                mensagem = messagebox.askyesno("Encerrar conta", "Você tem certeza que deseja encerrar a conta?")
+                if mensagem:
+                    for conta in ContaCorrente.contas:
+                        if int(lista[0]) == conta.id:
+                            conta.status = "Encerrado"
+                            self.tvw_conta_corrente.item(selecionado, values=(conta.id, conta.titular, conta.numero, conta.saldo, conta.status, conta.banco))
+                            self.conta_corrente.deiconify()
+                else:
+                    self.conta_corrente.deiconify()
+            else:
+                messagebox.showinfo("Conta não encerrada", "A conta já foi encerrada ou não está zerada")
+                self.conta_corrente.deiconify()
+
+        def conta_poupanca():
+            self.conta_poupanca = tk.Toplevel()
+            self.conta_poupanca.title("Conta Poupanca")
+            self.conta_poupanca.geometry("625x300")
+            self.conta.destroy()
+            # self.conta_poupanca.geometry("412x300")
+
+            self.frm_cc = tk.Frame(self.conta_poupanca)
+            self.frm_cc.pack(side=tk.BOTTOM)
+
+            colunas = ["id", "cliente", "número", "saldo", "status", "banco"]
+            self.tvw_conta_poupanca = ttk.Treeview(self.conta_poupanca, columns=colunas, show="headings")
+            self.tvw_conta_poupanca.pack(side=tk.LEFT, fill=tk.BOTH)
+
+            # Cabeçalho
+            self.tvw_conta_poupanca.heading(colunas[0], text='Id')
+            self.tvw_conta_poupanca.heading(colunas[1], text='Cliente')
+            self.tvw_conta_poupanca.heading(colunas[2], text='Número')
+            self.tvw_conta_poupanca.heading(colunas[3], text='Saldo')
+            self.tvw_conta_poupanca.heading(colunas[4], text='Status')
+            self.tvw_conta_poupanca.heading(colunas[5], text='Banco')
+
+            # Tamanho
+            self.tvw_conta_poupanca.column(colunas[0], minwidth=0, width=25)
+            self.tvw_conta_poupanca.column(colunas[1], minwidth=0, width=160)
+            self.tvw_conta_poupanca.column(colunas[2], minwidth=0, width=105)
+            self.tvw_conta_poupanca.column(colunas[3], minwidth=0, width=105)
+            self.tvw_conta_poupanca.column(colunas[4], minwidth=0, width=105)
+            self.tvw_conta_poupanca.column(colunas[5], minwidth=0, width=105)
+
+            # Scrollbar
+            self.scr_conta_corrente = ttk.Scrollbar(self.conta_poupanca, command=self.tvw_conta_poupanca.yview)
+            self.scr_conta_corrente.pack(side=tk.LEFT, fill=tk.BOTH)
+            self.tvw_conta_poupanca.configure(yscroll=self.scr_conta_corrente.set)
+
+            self.btn_cc_cadastrar = tk.Button(self.frm_cc, font=("Verdana", 12), text="Cadastrar", bg="white",
+                                              command=cadastrar_cp)
+            self.btn_cc_cadastrar.pack(side=tk.LEFT, fill=tk.BOTH)
+            self.btn_cc_depositar = tk.Button(self.frm_cc, font=("Verdana", 12), text="Depositar", bg="green",
+                                              command=depositar_cp)
+            self.btn_cc_depositar.pack(side=tk.LEFT, fill=tk.BOTH)
+            self.btn_cc_sacar = tk.Button(self.frm_cc, font=("Verdana", 12), text="Sacar", bg="green",
+                                          command=sacar_cp)
+            self.btn_cc_sacar.pack(side=tk.LEFT, fill=tk.BOTH)
+            self.btn_cc_extrato = tk.Button(self.frm_cc, font=("Verdana", 12), text="Extrato", bg="yellow",
+                                            command=cadastrar_cp)
+            self.btn_cc_extrato.pack(side=tk.LEFT, fill=tk.BOTH)
+
+            self.btn_cc_encerrar = tk.Button(self.frm_cc, text="Encerrar", font=("Verdana", 12), bg="orange",
+                                            command=encerrar_conta_poupanca)
+            self.btn_cc_encerrar.pack(side=tk.LEFT)
+
+        def cadastrar_cp():
+            self.cadastrar_cp = tk.Toplevel()
+            self.cadastrar_cp.geometry("280x130")
+            self.lbl_cadastro_nome = tk.Label(self.cadastrar_cp, text="Selecione o cliente:")
+            # self.lbl_cadastro_nome = tk.Label(self.cadastrar_cp, text="Selecione o cliente", font="Verdana, 12", bg="#6695fa")
+            self.lbl_cadastro_nome.grid(column=0, row=0, pady=5)
+            self.selecionado_cliente = tk.StringVar()
+            self.cbx_cc_cliente = ttk.Combobox(self.cadastrar_cp, textvariable=self.selecionado_cliente)
+            self.cbx_cc_cliente['values'] = Cliente.clientes
+            self.cbx_cc_cliente['state'] = 'readonly'
+            self.cbx_cc_cliente.current(0)
+            self.cbx_cc_cliente.grid(column=1, row=0)
+
+            self.lbl_cadastro_num = tk.Label(self.cadastrar_cp, text="Número:")
+            self.lbl_cadastro_num.grid(column=0, row=2)
+            self.ent_cadastro_num = tk.Entry(self.cadastrar_cp)
+            self.ent_cadastro_num.grid(column=1, row=2, pady=5)
+
+            self.btn_confirmar_cp = tk.Button(self.cadastrar_cp, text="Confirmar", command=confirmar_cadastro_cp)
+            self.btn_confirmar_cp.grid(column=1, row=3, columnspan=1)
+
+        def confirmar_cadastro_cp():
+            nome = ContaPoupanca(self.ent_cadastro_num.get(), self.selecionado_cliente.get())
+            selecionado = self.selecionado_cliente.get()
+            for cliente in Cliente.clientes:
+                if selecionado == cliente.nome:
+                    selecionado = cliente
+                    nome.banco = cliente.banco
+            ContaPoupanca.add_conta(self, nome)
+            self.tvw_conta_poupanca.insert("", tk.END, values=(nome.id, nome.titular, nome.numero, nome.saldo, nome.status, nome.banco))
+            self.cadastrar_cp.destroy()
+            self.conta_poupanca.deiconify()
+
+        def depositar_cp():
+            selecionado = self.tvw_conta_poupanca.selection()
+            lista = self.tvw_conta_poupanca.item(selecionado, "values")
+            if selecionado != ():
+                for conta in ContaPoupanca.contas:
+                    if int(lista[0]) == conta.id:
+                        if conta.status == "Ativo":
+                            self.depositar_cp = tk.Toplevel()
+                            self.depositar_cp.title("Depositar")
+                            self.depositar_cp.geometry("150x100")
+                            self.lbl_depositar = tk.Label(self.depositar_cp, text="Valor")
+                            self.lbl_depositar.pack()
+                            self.ent_depositar = tk.Entry(self.depositar_cp)
+                            self.ent_depositar.pack()
+                            self.btn_confirmar_deposito = tk.Button(self.depositar_cp, text="Confirmar",
+                                                                    command=confirmar_deposito_cp)
+                            self.btn_confirmar_deposito.pack(pady=5)
+                        else:
+                            messagebox.showinfo("Conta encerrada", "Esta conta foi encerrada")
+                            self.conta_poupanca.deiconify()
+
+        def confirmar_deposito_cp():
+            selecionado = self.tvw_conta_poupanca.selection()
+            lista = self.tvw_conta_poupanca.item(selecionado, "values")
+            for conta in ContaCorrente.contas:
+                if int(lista[0]) == conta.id:
+                    conta.deposito(float(self.ent_depositar.get()))
+                    self.tvw_conta_poupanca.item(selecionado, values=(conta.id, conta.titular, conta.numero, conta.saldo, conta.status, conta.banco))
+            self.depositar_cp.destroy()
+
+        def sacar_cp():
+            selecionado = self.tvw_conta_poupanca.selection()
+            lista = self.tvw_conta_poupanca.item(selecionado, "values")
+            if selecionado != ():
+                for conta in ContaCorrente.contas:
+                    if int(lista[0]) == conta.id:
+                        if conta.status == "Ativo":
+                            if selecionado != ():
+                                self.sacar_cp = tk.Toplevel()
+                                self.sacar_cp.title("Sacar")
+                                self.sacar_cp.geometry("150x100")
+                                self.lbl_sacar = tk.Label(self.sacar_cp, text="Valor")
+                                self.lbl_sacar.pack()
+                                self.ent_sacar = tk.Entry(self.sacar_cp)
+                                self.ent_sacar.pack()
+                                self.btn_confirmar_saque = tk.Button(self.sacar_cp, text="Confirmar",
+                                                                     command=confirmar_saque_cp)
+                                self.btn_confirmar_saque.pack(pady=5)
+                        else:
+                            messagebox.showinfo("Conta encerrada", "Esta conta foi encerrada")
+                            self.conta_poupanca.deiconify()
+
+        def confirmar_saque_cp():
+            selecionado = self.tvw_conta_poupanca.selection()
+            lista = self.tvw_conta_poupanca.item(selecionado, "values")
+            for conta in ContaCorrente.contas:
+                if int(lista[0]) == conta.id:
+                    if conta.saldo >= float(self.ent_sacar.get()):
+                        conta.saque(float(self.ent_sacar.get()))
+                        self.tvw_conta_poupanca.item(selecionado, values=(
+                        conta.id, conta.titular, conta.numero, conta.saldo, conta.status, conta.banco))
+                    else:
+                        messagebox.showinfo('Saldo insuficiente!', "Saldo insuficiente!")
+                        self.conta_poupanca.deiconify()
+            self.sacar_cp.destroy()
+
+        def encerrar_conta_poupanca():
+            selecionado = self.tvw_conta_poupanca.selection()
+            lista = self.tvw_conta_poupanca.item(selecionado, "values")
+            if float(lista[3]) == 0 and lista[4] == 'Ativo':
+                mensagem = messagebox.askyesno("Encerrar conta", "Você tem certeza que deseja encerrar a conta?")
+                if mensagem:
+                    for conta in ContaCorrente.contas:
+                        if int(lista[0]) == conta.id:
+                            conta.status = "Encerrado"
+                            self.tvw_conta_poupanca.item(selecionado, values=(conta.id, conta.titular, conta.numero, conta.saldo, conta.status, conta.banco))
+                            self.conta_poupanca.deiconify()
+                else:
+                    self.conta_poupanca.deiconify()
+            else:
+                messagebox.showinfo("Conta não encerrada", "A conta já foi encerrada ou não está zerada")
+                self.conta_poupanca.deiconify()
 
         def banco():
-            #banco1 = Banco("Elias Cacau", 123456)
-            # banco2 = Banco("Danone Player", 654789)
-            # banco3 = Banco("Luiz Eduardo", 654321)
-
-            #Banco.adicionar_banco(self, banco1)
-            # Banco.adicionar_banco(self, banco2)
-            # Banco.adicionar_banco(self, banco3)
             self.banco = tk.Toplevel()
             self.banco.title("Banco")
-            self.banco.geometry('800x600')
+            self.banco.geometry('290x260')
             self.janela.grab_set()
+            self.frm_btn_banco = tk.Frame(self.banco)
+            self.frm_btn_banco.pack(side=tk.BOTTOM)
 
             # Botões
-            self.btn_cadastrar = tk.Button(self.banco, text="Cadastrar", command=cadastrar_banco)
-            self.btn_cadastrar.grid(column=0, row=0)
+            self.btn_cadastrar_banco = tk.Button(self.frm_btn_banco, text="Cadastrar", command=cadastrar_banco, bg="#9cd7ff")
+            self.btn_cadastrar_banco.pack(side=tk.LEFT)
 
-            self.selecionado = tk.StringVar()
-            self.cbx_mostrar_banco = ttk.Combobox(self.banco, textvariable=self.selecionado)
-            self.cbx_mostrar_banco['values'] = Banco.bancos
-            self.cbx_mostrar_banco['state'] = 'readonly'
-            self.cbx_mostrar_banco.current(0)
-            self.cbx_mostrar_banco.grid(column=3, row=0)
+            self.btn_editar_banco = tk.Button(self.frm_btn_banco, text="Editar", command=editar_banco, bg="#9cd7ff")
+            self.btn_editar_banco.pack(side=tk.LEFT)
 
-            #self.btn_selecionar = tk.Button(self.banco, text="Selecionar", command=banco_selecionado)
-            self.btn_selecionar = tk.Button(self.banco, text="Selecionar")
-            self.btn_selecionar.grid(column=3, row=1)
+            self.btn_excluir_banco = tk.Button(self.frm_btn_banco, text="Excluir", command=excluir_banco, bg="#9cd7ff")
+            self.btn_excluir_banco.pack(side=tk.LEFT)
 
             colunas = ["número", "nome"]
             self.tvw_banco_selecionado = ttk.Treeview(self.banco, columns=colunas, show="headings")
-            self.tvw_banco_selecionado.grid(column=0, row=2)
+            self.tvw_banco_selecionado.pack(side=tk.LEFT, fill=tk.BOTH)
 
             # Cabeçalho
             self.tvw_banco_selecionado.heading(colunas[0], text='Número')
@@ -265,10 +521,6 @@ class Tela(ContaCorrente, ContaPoupanca, Cliente, Banco):
             #Conteudo
             for banco in Banco.bancos:
                 self.tvw_banco_selecionado.insert("", tk.END, values=(banco.num, banco.nome))
-
-            #self.tvw_banco_selecionado.insert("", tk.END, values=("Danone Player", 654789))
-            #self.tvw_banco_selecionado.insert("", tk.END, values=("Luiz Eduardo", 654321))
-
 
         def cadastrar_banco():
             self.cadastro_banco = tk.Toplevel()
@@ -290,70 +542,72 @@ class Tela(ContaCorrente, ContaPoupanca, Cliente, Banco):
             self.btn_salvar_bc.grid(column=1, row=3, columnspan=2)
 
         def confirmar_cadastro_banco():
-            nome = self.ent_nome_bc.get()
             nome = Banco(self.ent_num_bc.get(), self.ent_nome_bc.get())
             Banco.adicionar_banco(self, nome)
-            for i in Banco.bancos:
-                print(i.nome)
-            self.cbx_mostrar_banco['values'] = Banco.bancos
-            self.cbx_mostrar_banco.current(0)
             self.tvw_banco_selecionado.insert("", tk.END, values=(self.ent_num_bc.get(), self.ent_nome_bc.get()))
             self.cadastro_banco.destroy()
             self.banco.deiconify()
+        
+        def editar_banco():
+            self.editar_banco = tk.Toplevel()
+            self.editar_banco.title("Editar banco")
+            self.lbl_num = tk.Label(self.editar_banco, text='Número:')
+            self.lbl_num.grid(column=0, row=0)
 
+            self.lbl_nome = tk.Label(self.editar_banco, text='Nome:')
+            self.lbl_nome.grid(column=0, row=1)
 
-        # def banco_selecionado():
-        #     valor = self.selecionado.get()
-        #     for i in Banco.bancos:
-        #         if valor == i.nome:
-        #             banco_selecionado = i
-        #     todos = self.tvw_banco_selecionado.get_children()
-        #     for i in todos:
-        #         self.tvw_banco_selecionado.delete(i)
-        #     self.tvw_banco_selecionado.insert("", tk.END, values=(banco_selecionado.nome, banco_selecionado.num))
+            selecionado = self.tvw_banco_selecionado.selection()
+            lista = self.tvw_banco_selecionado.item(selecionado, "values")
 
-        # def editar_banco():
-        #     self.top_editar_banco = tk.Toplevel()
-        #     self.top_editar_banco.title("Editar banco")
-        #     self.lbl_num = tk.Label(self.top_editar_banco, text='Número:')
-        #     self.lbl_num.grid(column=0, row=0)
-        #
-        #     self.lbl_nome = tk.Label(self.top_editar_banco, text='Nome:')
-        #     self.lbl_nome.grid(column=0, row=1)
-        #
-        #     selecionado = self.tvw_banco_selecionado.selection()
-        #     lista = self.tvw_banco_selecionado.item(selecionado, "values")
-        #
-        #     self.entry_num = tk.Entry(self.top_editar_banco, width=30)
-        #     self.entry_num.grid(column=1, row=0)
-        #     self.entry_num.insert(0, lista[0])
-        #
-        #     self.entry_nome = tk.Entry(self.top_editar_banco, width=30)
-        #     self.entry_nome.grid(column=1, row=1)
-        #     self.entry_nome.insert(0, lista[1])
-        #
-        #     self.btn_confirmar = tk.Button(self.top_editar_banco, text='Confirmar', command=confirmar_edicao)
-        #     self.btn_confirmar.grid(column=1, row=3, columnspan=1)
-        #
-        # def confirmar_edicao():
-        #     num = self.entry_num.get()
-        #     nome = self.entry_nome.get()
-        #     selecionado = self.tvw_banco_selecionado.selection()
-        #     # print(selecionado)
-        #     # lista = self.tvw_banco_selecionado.item(selecionado, "values")
-        #     # if num == lista[0] and nome == lista[1]:
-        #     #     mensagem = messagebox.askyesno('Nenhuma modificação feita!', 'Você tem certeza que não deseja fazer nenhuma modificação?', parent=self.top_atualizar)
-        #     #     if mensagem == False:
-        #     #         self.banco.deiconify()
-        #     #     else:
-        #     #         self.top_editar_banco.destroy()
-        #     # else:
-        #     #     mensagem = messagebox.askyesno('Modificação feita!', 'Você tem certeza que deseja confirmar as alterações?', parent=self.top_atualizar)
-        #     #     if mensagem == False:
-        #     #         self.banco.deiconify()
-        #     #     else:
-        #     self.tvw_banco_selecionado.item(selecionado, values=(num, nome))
-        #     self.top_editar_banco.destroy()
+            self.entry_num = tk.Entry(self.editar_banco, width=30)
+            self.entry_num.grid(column=1, row=0)
+            self.entry_num.insert(0, lista[0])
+
+            self.entry_nome = tk.Entry(self.editar_banco, width=30)
+            self.entry_nome.grid(column=1, row=1)
+            self.entry_nome.insert(0, lista[1])
+
+            self.btn_confirmar = tk.Button(self.editar_banco, text='Confirmar', command=confirmar_edicao)
+            self.btn_confirmar.grid(column=1, row=3, columnspan=1)
+
+        def confirmar_edicao():
+            num = self.entry_num.get()
+            nome = self.entry_nome.get()
+            selecionado = self.tvw_banco_selecionado.selection()
+            lista = self.tvw_banco_selecionado.item(selecionado, "values")
+            if num == lista[0] and nome == lista[1]:
+                mensagem = messagebox.askyesno('Nenhuma modificação feita!', 'Você tem certeza que não deseja fazer nenhuma modificação?', parent=self.editar_banco)
+                if mensagem:
+                    self.editar_banco.destroy()
+            else:
+                mensagem = messagebox.askyesno('Modificação feita!', 'Você tem certeza que deseja confirmar as alterações?', parent=self.editar_banco)
+                if mensagem == False:
+                    self.editar_banco.deiconify()
+                else:
+                    for banco in Banco.bancos:
+                        if banco.num == lista[0] and banco.nome == lista[1]:
+                            banco.num = num
+                            banco.nome = nome
+                    self.tvw_banco_selecionado.item(selecionado, values=(num, nome))
+                    self.banco.deiconify()
+                    self.editar_banco.destroy()
+
+        def excluir_banco():
+            selecionado = self.tvw_banco_selecionado.selection()
+            lista = self.tvw_banco_selecionado.item(selecionado, "values")
+            if selecionado != ():
+                messagem = messagebox.askyesno("Cuidado!", "Tem certeza que deseja apagar o item selecionado?")
+                if messagem == False:
+                    self.banco.deiconify()
+                else:
+                    for l in lista:
+                        for banco in Banco.bancos:
+                            if l == banco.nome:
+                                Banco.bancos.remove(banco)
+                    for s in selecionado:
+                        self.tvw_banco_selecionado.delete(s)
+                    self.banco.deiconify()
 
         self.janela = master
         self.janela.title("Menu")
@@ -369,18 +623,6 @@ class Tela(ContaCorrente, ContaPoupanca, Cliente, Banco):
 
         self.btn_banco = tk.Button(self.janela, text="Banco", font=("Verdana", 12), height=5, bg='#375898', command=banco)
         self.btn_banco.pack(fill=tk.BOTH)
-
-        # cliente = Cliente("Elias Cacau", "024.631.012-02", "Rua Ametista")
-        # Cliente.adicionar_clientes(self, cliente)
-
-        #banco1 = Banco("Elias Cacau", 123456)
-        # banco2 = Banco("Danone Player", 654789)
-        # banco3 = Banco("Luiz Eduardo", 654321)
-        #Banco.adicionar_banco(self, banco1)
-        # Banco.adicionar_banco(self, banco2)
-        # Banco.adicionar_banco(self, banco3)
-
-
 
 sys.setrecursionlimit(1500)
 app = tk.Tk()

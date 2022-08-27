@@ -17,6 +17,6 @@ class ContaCorrente(Conta, Id):
         return self._saldo
 
     def deposito(self, valor):
-        self._saldo = self._saldo * self._taxa
+        self._saldo = self._saldo - 1
         self._saldo = self._saldo + valor
         return self._saldo

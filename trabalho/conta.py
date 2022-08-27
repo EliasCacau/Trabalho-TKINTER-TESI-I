@@ -2,6 +2,7 @@ from trabalho.id import Id
 
 
 class Conta(Id):
+    contas = []
     def __init__(self, num, cli):
         super().__init__()
         self._numero = num
@@ -9,6 +10,7 @@ class Conta(Id):
         self._saldo = 0
         self._status = "Ativo"
         self._id = 0
+        self._banco = ''
 
     #Métodos
     @property
@@ -43,6 +45,18 @@ class Conta(Id):
     def status(self, valor):
         self._status = valor
 
+    @property
+    def id(self):
+        return self._id
+
+    @property
+    def banco(self):
+        return self._banco
+
+    @banco.setter
+    def banco(self, valor):
+        self._banco = valor
+
     def saque(self, valor):
         if self._saldo >= valor:
             self._saldo = self._saldo - valor
@@ -54,10 +68,8 @@ class Conta(Id):
         self._saldo = self._saldo + valor
         return self._saldo
 
-    def atualizar_status(self):
-        if self._saldo <= 0:
-            self._status = "Encerrada"
-        return self._status
+    def add_conta(cls, conta):
+        Conta.contas.append(conta)
+        return Conta.contas
 
-    def id(self):
-        return self._id
+
