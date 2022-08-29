@@ -139,7 +139,8 @@ class Tela(ContaCorrente, ContaPoupanca, Cliente, Banco):
             end = self.entry_end_cli.get()
             selecionado = self.tvw_cliente.selection()
             lista = self.tvw_cliente.item(selecionado, "values")
-
+            id = lista[0]
+            banco = lista[4]
             if nome == lista[1] and cpf == lista[2] and end == lista[3]:
                 mensagem = messagebox.askyesno('Nenhuma modificação feita!', 'Você tem certeza que não deseja fazer nenhuma modificação?', parent=self.editar_cliente)
                 if mensagem:
@@ -150,11 +151,11 @@ class Tela(ContaCorrente, ContaPoupanca, Cliente, Banco):
                     self.editar_cliente.deiconify()
                 else:
                     for cliente in Cliente.clientes:
-                        if cliente == lista:
+                        if cliente.id == int(lista[0]) and cliente.cpf == lista[2]:
                             cliente.nome = nome
                             cliente.cpf = cpf
                             cliente.endereco = end
-                    self.tvw_cliente.item(selecionado, values=(lista[0], nome, cpf, end, lista[4]))
+                    self.tvw_cliente.item(selecionado, values=(id, nome, cpf, end, banco))
                     self.cliente.deiconify()
                     self.editar_cliente.destroy()
 
