@@ -5,7 +5,7 @@ from banco import Banco
 from cliente import Cliente
 from contaCorrente import ContaCorrente
 from contaPoupanca import ContaPoupanca
-import sys
+
 
 class Tela(ContaCorrente, ContaPoupanca, Cliente, Banco):
     def __init__(self, master):
@@ -795,7 +795,6 @@ class Tela(ContaCorrente, ContaPoupanca, Cliente, Banco):
         self.btn_banco = tk.Button(self.janela, text="Banco", font=("Verdana", 12), height=5, bg='#375898', command=banco)
         self.btn_banco.pack(fill=tk.BOTH)
 
-sys.setrecursionlimit(1500)
 app = tk.Tk()
 Tela(app)
 app.mainloop()
