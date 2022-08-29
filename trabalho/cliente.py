@@ -1,4 +1,4 @@
-from trabalho.id import Id
+from id import Id
 
 
 class Cliente(Id):
@@ -37,7 +37,7 @@ class Cliente(Id):
 
     @cpf.setter
     def cpf(self, valor):
-        self.cpf = valor
+        self._cpf = valor
 
     @property
     def id(self):
