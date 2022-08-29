@@ -1,3 +1,7 @@
+# Primeiro crie o banco
+# Segundo crie um cliente
+# Terceiro crie uma conta corrente ou poupança
+
 # Autendicador para saber se a conta foi encerrada ou não
 # Historico
 

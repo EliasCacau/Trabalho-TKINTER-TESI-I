@@ -1,4 +1,5 @@
 from trabalho.id import Id
+from extrato import Extrato
 
 
 class Conta(Id):
@@ -11,6 +12,8 @@ class Conta(Id):
         self._status = "Ativo"
         self._id = 0
         self._banco = ''
+        self._taxa = 0
+        self._extrato = Extrato()
 
     #Métodos
     @property
@@ -57,11 +60,13 @@ class Conta(Id):
     def banco(self, valor):
         self._banco = valor
 
+    @property
+    def extrato(self):
+        return self._extrato.extrato
+
     def saque(self, valor):
         if self._saldo >= valor:
             self._saldo = self._saldo - valor
-        else:
-            print("Saldo insuficiente")
         return self._saldo
 
     def deposito(self, valor):
@@ -71,5 +76,8 @@ class Conta(Id):
     def add_conta(cls, conta):
         Conta.contas.append(conta)
         return Conta.contas
+
+    def imprimir_extrato(self):
+        return self._extrato.imprimir(self.id)
 
 
