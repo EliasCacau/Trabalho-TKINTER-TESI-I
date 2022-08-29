@@ -1,5 +1,6 @@
-from trabalho.conta import Conta
-from trabalho.id import Id
+from conta import Conta
+from id import Id
+from datetime import datetime
 
 
 class ContaPoupanca(Conta, Id):
@@ -18,6 +19,28 @@ class ContaPoupanca(Conta, Id):
     def taxa(self):
         return self._taxa
 
+    def saque(self, valor):
+        if self._saldo >= valor:
+            tipo = "Saque"
+            self._saldo = self._saldo
+            self._saldo = self._saldo - valor
+            self.movimentacao(tipo, valor)
+        return self._saldo
+
+    def deposito(self, valor):
+        tipo = "Deposito"
+        self._saldo = self._saldo
+        self._saldo = self._saldo + valor
+        self.movimentacao(tipo, valor)
+        return self._saldo
+
     def add_conta(cls, conta):
         ContaPoupanca.contas_cp.append(conta)
         return ContaPoupanca.contas_cp
+
+    def movimentacao(self, tipo, valor):
+        today = datetime.now()
+        day = today.strftime("%d/%m/%Y às %H:%M")
+        self.extrato.append(
+            f"|{tipo}| no valor de {valor:.2f}| {day}|"
+        )

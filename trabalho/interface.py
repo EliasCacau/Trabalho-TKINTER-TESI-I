@@ -1,11 +1,11 @@
 import tkinter as tk
 from tkinter import ttk
 from tkinter import messagebox
-from trabalho.banco import Banco
-from trabalho.cliente import Cliente
-from trabalho.contaCorrente import ContaCorrente
-from trabalho.contaPoupanca import ContaPoupanca
-#import sys
+from banco import Banco
+from cliente import Cliente
+from contaCorrente import ContaCorrente
+from contaPoupanca import ContaPoupanca
+import sys
 
 class Tela(ContaCorrente, ContaPoupanca, Cliente, Banco):
     def __init__(self, master):
@@ -252,7 +252,7 @@ class Tela(ContaCorrente, ContaPoupanca, Cliente, Banco):
                                               command=sacar_cc)
             self.btn_cc_sacar.pack(side=tk.LEFT, fill=tk.BOTH)
             self.btn_cc_extrato = tk.Button(self.frm_cc, font=("Verdana", 12), text="Extrato", bg="yellow",
-                                              command=extrato)
+                                              command=extrato_cc)
             self.btn_cc_extrato.pack(side=tk.LEFT, fill=tk.BOTH)
 
             self.btn_cc_encerrar = tk.Button(self.frm_cc, text="Encerrar", font=("Verdana", 12), bg="orange", command=encerrar_conta_corrente)
@@ -260,7 +260,7 @@ class Tela(ContaCorrente, ContaPoupanca, Cliente, Banco):
 
         def cadastrar_cc():
             self.cadastrar_cc = tk.Toplevel()
-            self.cadastrar_cc.geometry("280x130")
+            self.cadastrar_cc.geometry("320x130")
             self.lbl_cadastro_nome = tk.Label(self.cadastrar_cc, text="Selecione o cliente:")
             self.lbl_cadastro_nome.grid(column=0, row=0, pady=5)
             self.selecionado_cliente = tk.StringVar()
@@ -370,7 +370,7 @@ class Tela(ContaCorrente, ContaPoupanca, Cliente, Banco):
                 messagebox.showinfo("Conta não encerrada", "A conta já foi encerrada ou não está zerada")
                 self.conta_corrente.deiconify()
 
-        def extrato():
+        def extrato_cc():
             selecao = self.tvw_conta_corrente.selection()
             item = self.tvw_conta_corrente.item(selecao, "values")
             if len(selecao) != 1:
@@ -381,6 +381,8 @@ class Tela(ContaCorrente, ContaPoupanca, Cliente, Banco):
                 toplevel.title("Cadastro de Conta Corrente")
                 toplevel.grab_set()
 
+                self.frmBtns = tk.Frame(toplevel)
+                self.frmBtns.pack(side=tk.BOTTOM)
                 # self.sct = ScrolledText(toplevel)
 
                 colunas = ['Operação', 'Valores', 'Data']
@@ -395,7 +397,7 @@ class Tela(ContaCorrente, ContaPoupanca, Cliente, Banco):
                 self.tvw.column(column=[2], minwidth=0, width=150)
 
                 scrollbar = tk.Scrollbar(toplevel, command=self.tvw.yview)
-                scrollbar.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+                scrollbar.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
                 self.tvw.configure(yscroll=scrollbar.set)
 
                 for conta in ContaCorrente.contas_cc:
@@ -410,11 +412,8 @@ class Tela(ContaCorrente, ContaPoupanca, Cliente, Banco):
                         if conta.id == int(item[0]):
                             conta.imprimir_extrato()
                             messagebox.showinfo("Extrato gerado!", f"O arquivo com o extrato da conta:'{conta.titular}' foi gerado!")
-
-                self.frmBtns = tk.Frame(toplevel)
-                self.frmBtns.pack(side=tk.BOTTOM)
                 self.btnS1 = tk.Button(self.frmBtns, text="Gerar arquivo", command=gerar_arquivo)
-                self.btnS1.pack(ipady=10)
+                self.btnS1.pack()
 
         def conta_poupanca():
             self.conta_poupanca = tk.Toplevel()
@@ -464,7 +463,7 @@ class Tela(ContaCorrente, ContaPoupanca, Cliente, Banco):
                                           command=sacar_cp)
             self.btn_cc_sacar.pack(side=tk.LEFT, fill=tk.BOTH)
             self.btn_cc_extrato = tk.Button(self.frm_cp, font=("Verdana", 12), text="Extrato", bg="yellow",
-                                            command=cadastrar_cp)
+                                            command=extrato_cp)
             self.btn_cc_extrato.pack(side=tk.LEFT, fill=tk.BOTH)
 
             self.btn_cc_encerrar = tk.Button(self.frm_cp, text="Encerrar", font=("Verdana", 12), bg="orange",
@@ -600,6 +599,49 @@ class Tela(ContaCorrente, ContaPoupanca, Cliente, Banco):
                             conta.saque(conta.taxa)
                             self.tvw_conta_poupanca.item(selecionado, values=(
                                 conta.id, conta.titular, conta.numero, conta.saldo, conta.status, conta.banco))
+        def extrato_cp():
+            selecao = self.tvw_conta_poupanca.selection()
+            item = self.tvw_conta_poupanca.item(selecao, "values")
+            if len(selecao) != 1:
+                messagebox.showerror("Error", "Selecione 1 conta somente!")
+            else:
+                toplevel = tk.Toplevel(self.conta_poupanca)
+                toplevel.minsize(700, 500)
+                toplevel.title("Extrato de Conta Popupança")
+                toplevel.grab_set()
+
+                self.frm_btn_excp = tk.Frame(toplevel)
+                self.frm_btn_excp.pack(side=tk.BOTTOM)
+
+                colunas = ['Operação', 'Valores', 'Data']
+                self.tvw = ttk.Treeview(toplevel, columns=colunas, show="headings")
+                self.tvw.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+                self.tvw.heading(colunas[0], text="Operação")
+                self.tvw.heading(colunas[1], text="Valores")
+                self.tvw.heading(colunas[2], text="Data")
+
+                self.tvw.column(column=[0], minwidth=0, width=300)
+                self.tvw.column(column=[1], minwidth=0, width=300)
+                self.tvw.column(column=[2], minwidth=0, width=150)
+
+                scrollbar = tk.Scrollbar(toplevel, command=self.tvw.yview)
+                scrollbar.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
+                self.tvw.configure(yscroll=scrollbar.set)
+
+                for conta in ContaPoupanca.contas_cp:
+                    if conta.id == int(item[0]):
+                        for mov in conta.extrato:
+                            frag = [x for x in mov.split("|")]
+                            self.tvw.insert('', tk.END, values=(frag[1], frag[2], frag[3]))
+                        break
+
+                def gerar_arquivo():
+                    for conta in ContaPoupanca.contas_cp:
+                        if conta.id == int(item[0]):
+                            conta.imprimir_extrato()
+                            messagebox.showinfo("Extrato gerado!", f"O arquivo com o extrato da conta:'{conta.titular}' foi gerado!")
+                self.btnS1 = tk.Button(self.frm_btn_excp, text="Gerar arquivo", command=gerar_arquivo)
+                self.btnS1.pack()
 
         def banco():
             self.banco = tk.Toplevel()
@@ -737,13 +779,7 @@ class Tela(ContaCorrente, ContaPoupanca, Cliente, Banco):
         self.btn_banco = tk.Button(self.janela, text="Banco", font=("Verdana", 12), height=5, bg='#375898', command=banco)
         self.btn_banco.pack(fill=tk.BOTH)
 
-        banco = Banco(123, "Santander")
-        Banco.adicionar_banco(self, banco)
-        cliente = Cliente("Elias de Olivera Cacau", "024.631.012-02", "Rua Letícia Rodrigues")
-        cliente.banco = banco
-        Cliente.adicionar_clientes(self, cliente)
-
-#sys.setrecursionlimit(1500)
+sys.setrecursionlimit(1500)
 app = tk.Tk()
 Tela(app)
 app.mainloop()
